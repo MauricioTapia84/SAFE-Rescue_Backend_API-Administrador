@@ -10,13 +10,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Controlador REST para la gestión de Bomberos
+ * Proporciona endpoints para operaciones CRUD y gestión de relaciones de Bomberos
+ */
 @RestController
 @RequestMapping("/api-administrador/v1/bomberos")
 public class BomberoController {
 
+    // SERVICIOS INYECTADOS
+
     @Autowired
     private BomberoService bomberoService;
 
+    // OPERACIONES CRUD BÁSICAS
+
+    /**
+     * Obtiene todos los bomberos registrados en el sistema.
+     * @return ResponseEntity con lista de bomberos o estado NO_CONTENT si no hay registros
+     */
     @GetMapping
     public ResponseEntity<List<Bombero>> listar(){
 
@@ -27,24 +39,11 @@ public class BomberoController {
         return ResponseEntity.ok(bomberos);
     }
 
-    @PostMapping
-    public ResponseEntity<String> agregarBombero(@RequestBody Bombero bombero) {
-        try {
-
-            bomberoService.validarBombero(bombero);
-            Bombero nuevoBombero = bomberoService.save(bombero);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Bombero creado con éxito.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(e.getMessage());
-        } catch (Exception e) {
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error interno del servidor.");
-        }
-    }
-
-
+    /**
+     * Busca un bombero bpor su ID.
+     * @param id ID del bombero a buscar
+     * @return ResponseEntity con el bombero encontrado o mensaje de error
+     */
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarBombero(@PathVariable long id) {
         Bombero bombero;
@@ -54,12 +53,34 @@ public class BomberoController {
         }catch(NoSuchElementException e){
             return new ResponseEntity<String>("Bombero no encontrado", HttpStatus.NOT_FOUND);
         }
-
         return ResponseEntity.ok(bombero);
-
     }
 
+    /**
+     * Crea un nuevo Bombero
+     * @param bombero Datos del Bombero a crear
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
+    @PostMapping
+    public ResponseEntity<String> agregarBombero(@RequestBody Bombero bombero) {
+        try {
+            Bombero nuevoBombero = bomberoService.save(bombero);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Bombero creado con éxito.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error interno del servidor.");
+        }
+    }
 
+    /**
+     * Actualiza un Bombero existente.
+     * @param id ID del Bombero a actualizar
+     * @param bombero Datos actualizados del Bombero
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
     @PutMapping("/{id}")
     public ResponseEntity<String> actualizarBombero(@PathVariable long id, @RequestBody Bombero bombero) {
         try {
@@ -77,6 +98,11 @@ public class BomberoController {
         }
     }
 
+    /**
+     * Elimina un Bombero del sistema.
+     * @param id ID del Bombero a eliminar
+     * @return ResponseEntity con mensaje de confirmación
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminarBombero(@PathVariable long id) {
 
@@ -93,9 +119,16 @@ public class BomberoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno del servidor.");
         }
-
     }
 
+    // GESTIÓN DE RELACIONES
+
+    /**
+     * Asigna una credencial a un bombero
+     * @param bomberoId ID del bombero
+     * @param credencialId ID de la credencial a asignar
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
     @PostMapping("/{bomberoId}/asignar-credencial/{credencialId}")
     public ResponseEntity<String> asignarCredencial(@PathVariable int bomberoId, @PathVariable int credencialId) {
         try {

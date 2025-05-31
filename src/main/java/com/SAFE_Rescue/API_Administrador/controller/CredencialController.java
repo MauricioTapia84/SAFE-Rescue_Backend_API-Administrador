@@ -11,13 +11,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Controlador REST para la gestión de credenciales
+ * Proporciona endpoints para operaciones CRUD y gestión de relaciones de credenciales
+ */
 @RestController
 @RequestMapping("/api-administrador/v1/credenciales")
 public class CredencialController {
 
+    // SERVICIOS INYECTADOS
+
     @Autowired
     private CredencialService credencialService;
 
+    // OPERACIONES CRUD BÁSICAS
+
+    /**
+     * Obtiene todos las credenciales registradas en el sistema.
+     * @return ResponseEntity con lista de credenciales o estado NO_CONTENT si no hay registros
+     */
     @GetMapping
     public ResponseEntity<List<Credencial>> listar(){
 
@@ -28,6 +40,28 @@ public class CredencialController {
         return ResponseEntity.ok(credenciales);
     }
 
+    /**
+     * Busca un Credencial por su ID.
+     * @param id ID del Credencial a buscar
+     * @return ResponseEntity con el Credencial encontrado o mensaje de error
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> buscarCredencial(@PathVariable long id) {
+        Credencial credencial;
+
+        try {
+            credencial = credencialService.findByID(id);
+        }catch(NoSuchElementException e){
+            return new ResponseEntity<String>("Credencial no encontrada", HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(credencial);
+    }
+
+    /**
+     * Crea una nueva Credencial
+     * @param credencial Datos de la Credencial a crear
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
     @PostMapping
     public ResponseEntity<String> agregarCredencial(@RequestBody Credencial credencial) {
         try {
@@ -40,21 +74,12 @@ public class CredencialController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> buscarCredencial(@PathVariable long id) {
-        Credencial credencial;
-
-        try {
-            credencial = credencialService.findByID(id);
-        }catch(NoSuchElementException e){
-            return new ResponseEntity<String>("Credencial no encontrada", HttpStatus.NOT_FOUND);
-        }
-
-        return ResponseEntity.ok(credencial);
-
-    }
-
-
+    /**
+     * Actualiza una Credencial existente.
+     * @param id ID de la Credencial a actualizar
+     * @param credencial Datos actualizados de la Credencial
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
     @PutMapping("/{id}")
     public ResponseEntity<String> actualizarCredencial(@PathVariable long id, @RequestBody Credencial credencial) {
         try {
@@ -72,9 +97,13 @@ public class CredencialController {
         }
     }
 
+    /**
+     * Elimina una credencial del sistema.
+     * @param id ID del credencial a eliminar
+     * @return ResponseEntity con mensaje de confirmación
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> eliminarCredencial(@PathVariable long id) {
-
         try {
             credencialService.delete(id);
             return ResponseEntity.ok("Credencial eliminada con éxito.");
@@ -88,10 +117,13 @@ public class CredencialController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno del servidor.");
         }
-
     }
 
-    @PostMapping("/login")
+    /**
+     * Permite iniciar sesion
+     * @param login credenciales de inicio sesion
+     * @return ResponseEntity con mensaje de confirmación o error y aumenta la cantidad de intentos fallidos
+     */    @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody Login login) {
         boolean isAuthenticated = credencialService.verificarCredenciales(login.getCorreo(), login.getContrasenia());
 
@@ -102,6 +134,12 @@ public class CredencialController {
         }
     }
 
+    /**
+     * Asigna un rol a una credencial
+     * @param credencialId ID del credencial
+     * @param rolId ID del rol a asignar
+     * @return ResponseEntity con mensaje de confirmación o error
+     */
     @PostMapping("/{credencialId}/asignar-rol/{rolId}")
     public ResponseEntity<String> asignarRol(@PathVariable int credencialId,@PathVariable int rolId) {
         try {

@@ -15,34 +15,58 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/**
+ * Servicio para la gestión integral de ciudadano
+ * Maneja operaciones CRUD, asignación de credeniales
+ * y validación de datos para ciudadano
+ */
 @Service
 @Transactional
 public class BomberoService {
 
-    @Autowired
-    private BomberoRepository bomberoRepository;
+    // REPOSITORIOS INYECTADOS
+    @Autowired private BomberoRepository bomberoRepository;
+    @Autowired private CredencialRepository credencialRepository;
 
-    @Autowired
-    private CredencialService credencialService;
+    // SERVICIOS INYECTADOS
+    @Autowired private CredencialService credencialService;
 
-    @Autowired
-    private CredencialRepository credencialRepository;
 
+    // MÉTODOS CRUD PRINCIPALES
+
+    /**
+     * Obtiene todos los Bomberos registrados en el sistema.
+     * @return Lista completa de Bomberos
+     */
     public List<Bombero> findAll(){
         return bomberoRepository.findAll();
     }
 
+    /**
+     * Busca un Bombero por su ID único.
+     * @param id Identificador del Bombero
+     * @return Bombero encontrado
+     * @throws NoSuchElementException Si no se encuentra el Bombero
+     */
     public Bombero findByID(long id){
-        return bomberoRepository.findById(id).get();
+        return bomberoRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("No se encontró Bomberos con ID: " + id));
     }
 
+    /**
+     * Guarda un nuevo Bombero en el sistema.
+     * Realiza validaciones y guarda relaciones con otros componentes.
+     * @param bombero Datos del Bombero a guardar
+     * @return Bombero guardado con ID generado
+     * @throws RuntimeException Si ocurre algún error durante el proceso
+     * @throws DataIntegrityViolationException Si ocurre algún error durante el proceso
+     */
     public Bombero save(Bombero bombero) {
         try {
-            Credencial credencial = bombero.getCredencial();
+
+            Credencial guardadaCredencial = credencialService.save(bombero.getCredencial());
 
             validarBombero(bombero);
-
-            Credencial guardadaCredencial = credencialService.save(credencial);
 
             bombero.setCredencial(guardadaCredencial);
 
@@ -56,8 +80,20 @@ public class BomberoService {
         }
     }
 
+    /**
+     * Actualiza los datos de un bombero existente.
+     * @param bombero Datos actualizados del bombero
+     * @param id Identificador del bombero a actualizar
+     * @return bombero actualizado
+     * @throws IllegalArgumentException Si el bombero proporcionado es nulo
+     * @throws NoSuchElementException Si no se encuentra el bombero a actualizar
+     * @throws RuntimeException Si ocurre algún error durante la actualización
+     */
     public Bombero update(Bombero bombero, long id) {
         try {
+            if (bombero == null) {
+                throw new IllegalArgumentException("El bombero no puede ser nulo");
+            }
 
             Bombero antiguoBombero = bomberoRepository.findById(id)
                     .orElseThrow(() -> new NoSuchElementException("Bombero no encontrado"));
@@ -66,8 +102,9 @@ public class BomberoService {
             if (bombero.getNombre() != null) {
                 if (bombero.getNombre().length() > 50) {
                     throw new RuntimeException("El valor nombre excede máximo de caracteres (50)");
+                }else {
+                    antiguoBombero.setNombre(bombero.getNombre());
                 }
-                antiguoBombero.setNombre(bombero.getNombre());
             }
 
             if (bombero.getTelefono() != null) {
@@ -76,8 +113,9 @@ public class BomberoService {
                 }else{
                     if (String.valueOf(bombero.getTelefono()).length()> 9) {
                         throw new RuntimeException("El valor telefono excede máximo de caracteres (9)");
+                    }else {
+                        antiguoBombero.setTelefono(bombero.getTelefono());
                     }
-                    antiguoBombero.setTelefono(bombero.getTelefono());
                 }
             }
 
@@ -87,34 +125,38 @@ public class BomberoService {
                 }else{
                     if (String.valueOf(bombero.getRun()).length() > 8) {
                         throw new RuntimeException("El valor RUN excede máximo de caracteres (8)");
+                    }else {
+                        antiguoBombero.setRun(bombero.getRun());
                     }
-                    antiguoBombero.setRun(bombero.getRun());
                 }
             }
 
             if (bombero.getDv() != null) {
                 if (bombero.getDv().length() > 1) {
                     throw new RuntimeException("El valor DV excede máximo de caracteres (1)");
+                }else {
+                    antiguoBombero.setDv(bombero.getDv());
                 }
-                antiguoBombero.setDv(bombero.getDv());
             }
 
-            if (bombero.getA_paterno() != null) {
-                if (bombero.getA_paterno().length() > 50) {
+            if (bombero.getAPaterno() != null) {
+                if (bombero.getAPaterno().length() > 50) {
                     throw new RuntimeException("El valor a_paterno excede máximo de caracteres (50)");
+                }else {
+                    antiguoBombero.setAPaterno(bombero.getAPaterno());
                 }
-                antiguoBombero.setA_paterno(bombero.getA_paterno());
             }
 
-            if (bombero.getA_materno() != null) {
-                if (bombero.getA_materno().length() > 50) {
+            if (bombero.getAMaterno() != null) {
+                if (bombero.getAMaterno().length() > 50) {
                     throw new RuntimeException("El valor a_materno excede máximo de caracteres (50)");
+                }else {
+                    antiguoBombero.setAMaterno(bombero.getAMaterno());
                 }
-                antiguoBombero.setA_materno(bombero.getA_materno());
             }
 
-            if (bombero.getFecha_registro() != null) {
-                antiguoBombero.setFecha_registro(bombero.getFecha_registro());
+            if (bombero.getFechaRegistro() != null) {
+                antiguoBombero.setFechaRegistro(bombero.getFechaRegistro());
             }
 
 
@@ -125,55 +167,94 @@ public class BomberoService {
         }
     }
 
+    /**
+     * Elimina un bombero del sistema.
+     * @param id Identificador del bombero a eliminar
+     * @throws NoSuchElementException Si no se encuentra el bombero
+     */
     public void delete(long id){
-        try {
-            if (!bomberoRepository.existsById(id)) {
-                throw new NoSuchElementException("Bombero no encontrado");
-            }
 
-            bomberoRepository.deleteById(id);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error al encontrar bombero: " + e.getMessage());
+        if (!bomberoRepository.existsById(id)) {
+            throw new NoSuchElementException("Bombero no encontrado");
         }
+        bomberoRepository.deleteById(id);
+
     }
 
+    // MÉTODOS PRIVADOS DE VALIDACIÓN Y UTILIDADES
+
+    /**
+     * Valida el bombero
+     * @param bombero bombero
+     * @throws IllegalArgumentException Si el bombero no cumple con las reglas de validación
+     */
     public void validarBombero(@NotNull Bombero bombero) {
 
-        if (bomberoRepository.existsByRun(bombero.getRun())) {
-            throw new RuntimeException("El RUN ya existe");
+        if (bombero.getRun() >= 0) {
+            throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
+        } else {
+            if (String.valueOf(bombero.getRun()).length() > 8) {
+                throw new RuntimeException("El valor RUN excede máximo de caracteres (8)");
+            }else{
+                if (bomberoRepository.existsByRun(bombero.getRun())) {
+                    throw new RuntimeException("El RUN ya existe");
+                }
+            }
         }
 
-        if (bomberoRepository.existsByTelefono(bombero.getTelefono())) {
-            throw new RuntimeException("El Telefono ya existe");
+        if (bombero.getDv() != null) {
+            if (bombero.getDv().length() > 1) {
+                throw new RuntimeException("El valor DV excede máximo de caracteres (1)");
+            }
+        } else {
+            throw new IllegalArgumentException("El DV del bombero es requerido");
         }
 
-        if (String.valueOf(bombero.getRun()).length() > 8) {
-            throw new RuntimeException("El valor RUN excede máximo de caracteres (8)");
+        if (bombero.getNombre() != null) {
+            if (bombero.getNombre().length() > 50) {
+                throw new RuntimeException("El valor nombre del bombero excede máximo de caracteres (50)");
+            }
+        } else {
+            throw new IllegalArgumentException("El nombre del bombero es requerido");
         }
 
-        if (bombero.getDv().length() > 1) {
-            throw new RuntimeException("El valor DV excede máximo de caracteres (1)");
+        if (bombero.getAPaterno() != null) {
+            if (bombero.getAPaterno().length() > 50) {
+                throw new RuntimeException("El valor apellido paterno del bombero excede máximo de caracteres (50)");
+            }
+        } else {
+            throw new IllegalArgumentException("El apellido paterno  del bombero es requerido");
         }
 
-        if (bombero.getNombre().length() > 50) {
-            throw new RuntimeException("El valor nombre excede máximo de caracteres (50)");
+        if (bombero.getAMaterno() != null) {
+            if (bombero.getAMaterno().length() > 50) {
+                throw new RuntimeException("El valor apellido materno excede máximo de caracteres (50)");
+            }
+        } else {
+            throw new IllegalArgumentException("El apellido materno  del ciudadano es requerido");
         }
 
-        if (bombero.getA_paterno().length() > 50) {
-            throw new RuntimeException("El valor a_paterno excede máximo de caracteres (50)");
-        }
-
-        if (bombero.getA_materno().length() > 50) {
-            throw new RuntimeException("El valor a_materno excede máximo de caracteres (50)");
-        }
-
-        if (String.valueOf(bombero.getTelefono()).length()> 9) {
-            throw new RuntimeException("El valor telefono excede máximo de caracteres (9)");
+        if (bombero.getTelefono() >= 0) {
+            throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
+        } else {
+            if (String.valueOf(bombero.getTelefono()).length()> 9) {
+                throw new RuntimeException("El valor telefono excede máximo de caracteres (9)");
+            }else{
+                if (bomberoRepository.existsByTelefono(bombero.getTelefono())) {
+                    throw new RuntimeException("El Telefono ya existe");
+                }
+            }
         }
 
     }
 
+    // MÉTODOS DE ASIGNACIÓN DE RELACIONES
+
+    /**
+     * Asigna un Credencial a un bombero
+     * @param bomberoId ID del bombero
+     * @param credencialId ID del credencial
+     */
     public void asignarCredencial(long bomberoId, long credencialId) {
         Bombero bombero = bomberoRepository.findById(bomberoId)
                 .orElseThrow(() -> new RuntimeException("Bombero no encontrado"));
