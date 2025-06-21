@@ -190,7 +190,7 @@ public class BomberoService {
      */
     public void validarBombero(@NotNull Bombero bombero) {
 
-        if (bombero.getRun() >= 0) {
+        if (bombero.getRun() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         } else {
             if (String.valueOf(bombero.getRun()).length() > 8) {
@@ -223,7 +223,7 @@ public class BomberoService {
                 throw new RuntimeException("El valor apellido paterno del bombero excede máximo de caracteres (50)");
             }
         } else {
-            throw new IllegalArgumentException("El apellido paterno  del bombero es requerido");
+            throw new IllegalArgumentException("El apellido paterno del bombero es requerido");
         }
 
         if (bombero.getAMaterno() != null) {
@@ -234,7 +234,7 @@ public class BomberoService {
             throw new IllegalArgumentException("El apellido materno  del ciudadano es requerido");
         }
 
-        if (bombero.getTelefono() >= 0) {
+        if (bombero.getTelefono() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         } else {
             if (String.valueOf(bombero.getTelefono()).length()> 9) {

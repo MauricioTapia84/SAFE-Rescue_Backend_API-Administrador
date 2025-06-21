@@ -145,7 +145,7 @@ public class CredencialService {
      */
     public void validarCredencial(Credencial credencial) {
 
-        if (credencial.getIntentosFallidos() >= 0) {
+        if (credencial.getIntentosFallidos() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         }
 
