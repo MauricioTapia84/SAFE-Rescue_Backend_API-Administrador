@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BomberoRepository extends JpaRepository<Bombero , Long> {
 
-    public boolean existsByRun(Long run);
+    public boolean existsByRun(Integer run);
 
-    public boolean existsByTelefono(Long telefono);
+    public boolean existsByTelefono(Integer telefono);
 
 }

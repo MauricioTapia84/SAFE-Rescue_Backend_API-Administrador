@@ -30,7 +30,7 @@ public class Bombero {
      * Debe ser un valor no nulo, único y con una longitud máxima recomendada de 8 caracteres
      */
     @Column(unique = true,length = 8,nullable = false)
-    private int run;
+    private Integer run;
 
     /**
      * Digito verificador del Bombero
@@ -73,7 +73,7 @@ public class Bombero {
      * Representa unidades disponibles en inventario
      */
     @Column(unique = true, length = 9, nullable = false)
-    private int telefono;
+    private Integer telefono;
 
     /**
      * Credenciales
