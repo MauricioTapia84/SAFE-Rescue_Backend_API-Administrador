@@ -37,7 +37,7 @@ public class RolService {
      * @return rol encontrado
      * @throws NoSuchElementException Si no se encuentra el rol
      */
-    public Rol findByRol(long id){
+    public Rol findByRol(Integer id){
         return rolRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No se encontró rol con ID: " + id));
     }
@@ -48,15 +48,15 @@ public class RolService {
      * @param rol Datos del rol a guardar
      * @return rol guardado con ID generado
      * @throws RuntimeException Si ocurre algún error durante el proceso
-     * @throws DataIntegrityViolationException Si ocurre algún error durante el proceso
+     * @throws IllegalArgumentException Si el rol no cumple con los parametros
      */
     public Rol save(Rol rol) {
         try {
 
             validarRol(rol);
             return rolRepository.save(rol);
-        } catch (EntityNotFoundException e) {
-            throw new RuntimeException("Error al guardar la rol: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error al guardar la rol: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Error inesperado: " + e.getMessage());
         }
@@ -71,7 +71,7 @@ public class RolService {
      * @throws NoSuchElementException Si no se encuentra el rol a actualizar
      * @throws RuntimeException Si ocurre algún error durante la actualización
      */
-    public Rol update(Rol rol ,long id) {
+    public Rol update(Rol rol ,Integer id) {
         try {
             if (rol == null) {
                 throw new IllegalArgumentException("El rol no puede ser nulo");
@@ -100,7 +100,7 @@ public class RolService {
      * @param id Identificador del rol a eliminar
      * @throws NoSuchElementException Si no se encuentra el rol
      */
-    public void delete(long id){
+    public void delete(Integer id){
 
         if (!rolRepository.existsById(id)) {
             throw new NoSuchElementException("Rol no encontrada");

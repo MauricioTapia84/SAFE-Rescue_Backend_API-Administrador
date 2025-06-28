@@ -48,7 +48,7 @@ public class BomberoService {
      * @return Bombero encontrado
      * @throws NoSuchElementException Si no se encuentra el Bombero
      */
-    public Bombero findByID(long id){
+    public Bombero findByID(Integer id){
         return bomberoRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No se encontró Bomberos con ID: " + id));
     }
@@ -89,7 +89,7 @@ public class BomberoService {
      * @throws NoSuchElementException Si no se encuentra el bombero a actualizar
      * @throws RuntimeException Si ocurre algún error durante la actualización
      */
-    public Bombero update(Bombero bombero, long id) {
+    public Bombero update(Bombero bombero, Integer id) {
         try {
             if (bombero == null) {
                 throw new IllegalArgumentException("El bombero no puede ser nulo");
@@ -107,29 +107,26 @@ public class BomberoService {
                 }
             }
 
-            if (bombero.getTelefono() != null) {
-                if (bomberoRepository.existsByTelefono(bombero.getTelefono())) {
-                    throw new RuntimeException("El Telefono ya existe");
-                }else{
-                    if (String.valueOf(bombero.getTelefono()).length()> 9) {
-                        throw new RuntimeException("El valor telefono excede máximo de caracteres (9)");
-                    }else {
-                        antiguoBombero.setTelefono(bombero.getTelefono());
-                    }
+            if (bomberoRepository.existsByTelefono(bombero.getTelefono())) {
+                throw new RuntimeException("El Telefono ya existe");
+            }else{
+                if (String.valueOf(bombero.getTelefono()).length()> 9) {
+                    throw new RuntimeException("El valor telefono excede máximo de caracteres (9)");
+                }else {
+                    antiguoBombero.setTelefono(bombero.getTelefono());
                 }
             }
 
-            if (bombero.getRun() != null) {
-                if (bomberoRepository.existsByRun(bombero.getRun())) {
-                    throw new RuntimeException("El RUN ya existe");
-                }else{
-                    if (String.valueOf(bombero.getRun()).length() > 8) {
-                        throw new RuntimeException("El valor RUN excede máximo de caracteres (8)");
-                    }else {
-                        antiguoBombero.setRun(bombero.getRun());
-                    }
+            if (bomberoRepository.existsByRun(bombero.getRun())) {
+                throw new RuntimeException("El RUN ya existe");
+            }else{
+                if (String.valueOf(bombero.getRun()).length() > 8) {
+                    throw new RuntimeException("El valor RUN excede máximo de caracteres (8)");
+                }else {
+                    antiguoBombero.setRun(bombero.getRun());
                 }
             }
+
 
             if (bombero.getDv() != null) {
                 if (bombero.getDv().length() > 1) {
@@ -172,7 +169,7 @@ public class BomberoService {
      * @param id Identificador del bombero a eliminar
      * @throws NoSuchElementException Si no se encuentra el bombero
      */
-    public void delete(long id){
+    public void delete(Integer id){
 
         if (!bomberoRepository.existsById(id)) {
             throw new NoSuchElementException("Bombero no encontrado");
@@ -190,7 +187,7 @@ public class BomberoService {
      */
     public void validarBombero(@NotNull Bombero bombero) {
 
-        if (bombero.getRun() >= 0) {
+        if (bombero.getRun() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         } else {
             if (String.valueOf(bombero.getRun()).length() > 8) {
@@ -234,7 +231,7 @@ public class BomberoService {
             throw new IllegalArgumentException("El apellido materno  del ciudadano es requerido");
         }
 
-        if (bombero.getTelefono() >= 0) {
+        if (bombero.getTelefono() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         } else {
             if (String.valueOf(bombero.getTelefono()).length()> 9) {
@@ -255,7 +252,7 @@ public class BomberoService {
      * @param bomberoId ID del bombero
      * @param credencialId ID del credencial
      */
-    public void asignarCredencial(long bomberoId, long credencialId) {
+    public void asignarCredencial(Integer bomberoId, Integer credencialId) {
         Bombero bombero = bomberoRepository.findById(bomberoId)
                 .orElseThrow(() -> new RuntimeException("Bombero no encontrado"));
 

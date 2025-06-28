@@ -46,7 +46,7 @@ public class CredencialService {
      * @return credencial encontrado
      * @throws NoSuchElementException Si no se encuentra el credencial
      */
-    public Credencial findByID(long id){
+    public Credencial findByID(Integer id){
         return credencialRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No se encontró Credencial con ID: " + id));
     }
@@ -86,7 +86,7 @@ public class CredencialService {
      * @throws NoSuchElementException Si no se encuentra el credencial a actualizar
      * @throws RuntimeException Si ocurre algún error durante la actualización
      */
-    public Credencial update(Credencial credencial ,long id) {
+    public Credencial update(Credencial credencial ,Integer id) {
         try {
             if (credencial == null) {
                 throw new IllegalArgumentException("El Credencial no puede ser nulo");
@@ -128,7 +128,7 @@ public class CredencialService {
      * @param id Identificador del credencial a eliminar
      * @throws NoSuchElementException Si no se encuentra el credencial
      */
-    public void delete(long id){
+    public void delete(Integer id){
 
         if (!credencialRepository.existsById(id)) {
             throw new NoSuchElementException("Credencial no encontrada");
@@ -145,7 +145,7 @@ public class CredencialService {
      */
     public void validarCredencial(Credencial credencial) {
 
-        if (credencial.getIntentosFallidos() >= 0) {
+        if (credencial.getIntentosFallidos() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         }
 
@@ -211,7 +211,7 @@ public class CredencialService {
      * @param credencialId ID del credencial
      * @param  rolId del rol
      */
-    public void asignarRol(long credencialId,long rolId) {
+    public void asignarRol(Integer credencialId,Integer rolId) {
         Rol rol = rolRepository.findById(rolId)
                 .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
 

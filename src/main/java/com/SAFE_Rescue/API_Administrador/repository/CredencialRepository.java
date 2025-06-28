@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
  * Maneja validadores para encontrar el correo
  */
 @Repository
-public interface CredencialRepository extends JpaRepository<Credencial, Long> {
+public interface CredencialRepository extends JpaRepository<Credencial, Integer> {
 
     Credencial findByCorreo(String correo);
 

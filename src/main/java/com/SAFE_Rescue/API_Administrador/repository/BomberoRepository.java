@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
  * Maneja validadores para encontrar el run y telefono
  */
 @Repository
-public interface BomberoRepository extends JpaRepository<Bombero , Long> {
+public interface BomberoRepository extends JpaRepository<Bombero , Integer> {
 
-    public boolean existsByRun(Integer run);
+    public boolean existsByRun(int run);
 
-    public boolean existsByTelefono(Integer telefono);
+    public boolean existsByTelefono(int telefono);
 
 }
