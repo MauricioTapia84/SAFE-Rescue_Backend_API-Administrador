@@ -192,9 +192,9 @@ public class CredencialController {
             @ApiResponse(responseCode = "400", description = "Error en la solicitud.")
     })
     public ResponseEntity<String> asignarRol(@Parameter(description = "ID de la credencial", required = true)
-                                             @PathVariable int credencialId,
+                                             @PathVariable Integer credencialId,
                                              @Parameter(description = "ID del rol a asignar", required = true)
-                                             @PathVariable int rolId) {
+                                             @PathVariable Integer rolId) {
         try {
             credencialService.asignarRol(credencialId, rolId);
             return ResponseEntity.ok("Rol asignado a la credencial exitosamente");

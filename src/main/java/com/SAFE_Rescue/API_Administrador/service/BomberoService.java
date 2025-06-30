@@ -1,7 +1,6 @@
 package com.SAFE_Rescue.API_Administrador.service;
 
 import com.SAFE_Rescue.API_Administrador.modelo.Credencial;
-import com.SAFE_Rescue.API_Administrador.modelo.Rol;
 import com.SAFE_Rescue.API_Administrador.repository.BomberoRepository;
 import com.SAFE_Rescue.API_Administrador.modelo.Bombero;
 import com.SAFE_Rescue.API_Administrador.repository.CredencialRepository;
@@ -159,8 +158,12 @@ public class BomberoService {
 
             return bomberoRepository.save(antiguoBombero);
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar el bombero: " + e.getMessage());
+        }catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error al actualizar el bombero: " + e.getMessage());
+        } catch (NoSuchElementException  f) {
+            throw new NoSuchElementException("Error al actualizar el bombero: " + f.getMessage());
+        } catch (Exception g) {
+            throw new RuntimeException("Error al actualizar el bombero: " + g.getMessage());
         }
     }
 

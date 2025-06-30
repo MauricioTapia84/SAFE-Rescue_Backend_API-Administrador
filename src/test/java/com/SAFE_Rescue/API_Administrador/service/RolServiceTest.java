@@ -2,6 +2,7 @@ package com.SAFE_Rescue.API_Administrador.service;
 
 import com.SAFE_Rescue.API_Administrador.modelo.Rol;
 import com.SAFE_Rescue.API_Administrador.repository.RolRepository;
+import lombok.extern.slf4j.Slf4j;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@Slf4j
 @SpringBootTest
 public class RolServiceTest {
 
@@ -26,23 +28,28 @@ public class RolServiceTest {
     private RolRepository rolRepository;
 
     private Faker faker;
+    private Rol rol;
+    private Rol rolNulo;
+    private Integer id;
 
     @BeforeEach
     public void setUp() {
         faker = new Faker();
+        rol = new Rol(1, faker.job().position());
+        rolNulo = new Rol(1, null);
+        id = 1;
     }
 
     /**
      * Prueba para obtener todos los roles registrados en el sistema.
      */
     @Test
-    public void findAllRolesTest() {
+    public void findAllTest() {
         // Arrange
-        Rol rol = new Rol(1, faker.job().position());
         when(rolRepository.findAll()).thenReturn(List.of(rol));
 
         // Act
-        List<Rol> roles = rolService.findAllRoles();
+        List<Rol> roles = rolService.findAll();
 
         // Assert
         assertNotNull(roles);
@@ -54,14 +61,12 @@ public class RolServiceTest {
      * Prueba para buscar un rol por su ID.
      */
     @Test
-    public void findByRolTest() {
+    public void findByIdTest() {
         // Arrange
-        Integer id = 1;
-        Rol rol = new Rol(id, faker.job().position());
         when(rolRepository.findById(id)).thenReturn(Optional.of(rol));
 
         // Act
-        Rol encontrado = rolService.findByRol(id);
+        Rol encontrado = rolService.findById(id);
 
         // Assert
         assertNotNull(encontrado);
@@ -75,7 +80,6 @@ public class RolServiceTest {
     @Test
     public void saveTest() {
         // Arrange
-        Rol rol = new Rol(1, faker.job().position());
         when(rolRepository.save(rol)).thenReturn(rol);
 
         // Act
@@ -93,7 +97,6 @@ public class RolServiceTest {
     @Test
     public void updateTest() {
         // Arrange
-        Integer id = 1;
         Rol rolExistente = new Rol(id, faker.job().position());
         Rol rolActualizado = new Rol(id, faker.job().title());
         when(rolRepository.findById(id)).thenReturn(Optional.of(rolExistente));
@@ -115,7 +118,6 @@ public class RolServiceTest {
     @Test
     public void deleteTest() {
         // Arrange
-        Integer id = 1;
         when(rolRepository.existsById(id)).thenReturn(true);
         doNothing().when(rolRepository).deleteById(id);
 
@@ -127,12 +129,78 @@ public class RolServiceTest {
     }
 
     /**
+     * Prueba para validar un rol en el sistema
+    */
+    @Test
+    public void validarRolTest() {
+        // Arrange
+        String nombre = faker.job().position();
+        if (nombre.length() > 50) {
+            nombre = nombre.substring(0, 50);
+        }
+
+        Rol rol = new Rol(1, nombre);
+
+        // Act & Assert
+        assertDoesNotThrow(() -> rolService.validarRol(rol));
+    }
+
+
+    //ERRORES
+
+    /**
+     * Prueba para manejar la búsqueda de un rol por su ID de un rol que no existe.
+     */
+    @Test
+    public void findByIdRolNoEncontradoTest() {
+        // Arrange
+        when(rolRepository.existsById(id)).thenReturn(false);
+
+        // Assert
+        assertThrows(NoSuchElementException.class, () -> rolService.findById(id));
+    }
+
+
+    /**
+     * Prueba para validar los datos al guardar un rol.
+     */
+    @Test
+    public void saveRolValidacionTest() {
+        // Assert
+        assertThrows(IllegalArgumentException.class, () -> rolService.save(rolNulo));
+    }
+
+    /**
+     * Prueba para manejar la actualización de un rol que no existe.
+     */
+    @Test
+    public void updateRolNoEncontradoTest() {
+        // Arrange
+        when(rolRepository.findById(id)).thenReturn(Optional.empty());
+
+        // Assert
+        assertThrows(NoSuchElementException.class, () -> rolService.update(rol,id));
+    }
+
+    /**
+     * Prueba para validar los datos al actualizar un rol.
+     */
+    @Test
+    public void updateRolValidacionTest() {
+        // Arrange
+        when(rolRepository.findById(id)).thenReturn(Optional.of(new Rol(id,"NombreValido")));
+
+        // Assert
+        assertThrows(IllegalArgumentException.class, () -> rolService.update(rolNulo,1));
+    }
+
+
+    /**
      * Prueba para manejar la eliminación de un rol que no existe.
      */
     @Test
     public void deleteRolNoEncontradoTest() {
         // Arrange
-        Integer id = 1;
         when(rolRepository.existsById(id)).thenReturn(false);
 
         // Assert
@@ -140,14 +208,23 @@ public class RolServiceTest {
     }
 
     /**
-     * Prueba para validar los datos al guardar un rol.
+     * Prueba para validar nombre nulo
      */
     @Test
-    public void saveRolValidationTest() {
+    public void validarRolNombreNuloTest() {
+        // Assert
+        assertThrows(IllegalArgumentException.class, () -> rolService.validarRol(rolNulo));
+    }
+
+    /**
+     * Prueba para validar nombre que excede el límite de caracteres
+     */
+    @Test
+    public void validarRolNombreExcedeLimiteTest() {
         // Arrange
-        Rol rolInvalido = new Rol(1, null); // Nombre nulo
+        Rol rolInvalido = new Rol(1,"EsteNombreEsDemasiadoLargoParaElLimiteDeCincuentaCaracteres");
 
         // Assert
-        assertThrows(IllegalArgumentException.class, () -> rolService.save(rolInvalido));
+        assertThrows(IllegalArgumentException.class, () -> rolService.validarRol(rolInvalido));
     }
 }

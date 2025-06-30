@@ -171,9 +171,9 @@ public class BomberoController {
             @ApiResponse(responseCode = "400", description = "Error en la solicitud.")
     })
     public ResponseEntity<String> asignarCredencial(@Parameter(description = "ID del bombero", required = true)
-                                                    @PathVariable int bomberoId,
+                                                    @PathVariable Integer bomberoId,
                                                     @Parameter(description = "ID de la credencial a asignar", required = true)
-                                                    @PathVariable int credencialId) {
+                                                    @PathVariable Integer credencialId) {
         try {
             bomberoService.asignarCredencial(bomberoId, credencialId);
             return ResponseEntity.ok("Credencial asignada al bombero exitosamente");

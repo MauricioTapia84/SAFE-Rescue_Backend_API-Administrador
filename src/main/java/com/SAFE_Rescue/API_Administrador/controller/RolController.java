@@ -43,8 +43,8 @@ public class RolController {
                             schema = @Schema(implementation = Rol.class))),
             @ApiResponse(responseCode = "204", description = "No hay roles registrados.")
     })
-    public ResponseEntity<List<Rol>> listarRoles() {
-        List<Rol> roles = rolService.findAllRoles();
+    public ResponseEntity<List<Rol>> listar() {
+        List<Rol> roles = rolService.findAll();
         if (roles.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -68,7 +68,7 @@ public class RolController {
                                        @PathVariable int id) {
         Rol rol;
         try {
-            rol = rolService.findByRol(id);
+            rol = rolService.findById(id);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>("Rol no encontrado", HttpStatus.NOT_FOUND);
         }

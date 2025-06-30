@@ -70,10 +70,10 @@ public class CredencialService {
             return credencialRepository.save(credencial);
         } catch (DataIntegrityViolationException e) {
             throw new RuntimeException("El correo ya está en uso. Por favor, use otro.");
-        } catch (EntityNotFoundException e) {
-            throw new RuntimeException("Error al guardar la credencial: " + e.getMessage());
-        } catch (Exception e) {
-            throw new RuntimeException("Error inesperado: " + e.getMessage());
+        } catch (EntityNotFoundException f) {
+            throw new RuntimeException("Error al guardar la credencial: " + f.getMessage());
+        } catch (Exception g) {
+            throw new RuntimeException("Error inesperado: " + g.getMessage());
         }
     }
 
@@ -118,8 +118,12 @@ public class CredencialService {
 
             antiguaCredencial.setActivo(credencial.isActivo());
             return credencialRepository.save(antiguaCredencial);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar el credencial: " + e.getMessage());
+        }catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error al actualizar la credencial: " + e.getMessage());
+        } catch (NoSuchElementException  f) {
+            throw new NoSuchElementException("Error al actualizar la credencial: " + f.getMessage());
+        } catch (Exception g) {
+            throw new RuntimeException("Error al actualizar la credencial: " + g.getMessage());
         }
     }
 
@@ -145,44 +149,28 @@ public class CredencialService {
      */
     public void validarCredencial(Credencial credencial) {
 
+        if (credencial.getContrasenia() == null) {
+            throw new IllegalArgumentException("La Contrasenia del ciudadano es requerido");
+        }
+
+        if (credencial.getContrasenia().length() > 16) {
+            throw new IllegalArgumentException("El valor Contrasenia excede máximo de caracteres (16)");
+        }
+
+        if (credencial.getCorreo() == null) {
+            throw new IllegalArgumentException("El Correo es requerido");
+        }
+
+        if (credencial.getCorreo().length() >80) {
+            throw new IllegalArgumentException("El valor de Correo excede máximo de caracteres (80)");
+        }
+
         if (credencial.getIntentosFallidos() < 0) {
             throw new IllegalArgumentException("La Cantidad debe ser un número positivo");
         }
 
-        if (credencial.getContrasenia() != null) {
-            if (credencial.getContrasenia().length() > 16) {
-                throw new RuntimeException("El valor Contrasenia excede máximo de caracteres (16)");
-            }
-        } else {
-            throw new IllegalArgumentException("La Contrasenia del ciudadano es requerido");
-        }
-
-        if (credencial.getCorreo() != null) {
-            if (credencial.getCorreo().length() > 80) {
-                throw new RuntimeException("El valor de Correo excede máximo de caracteres (80)");
-            }
-        } else {
-            throw new IllegalArgumentException("El Correo es requerido");
-        }
-
-        validarRol(credencial.getRol());
+        rolService.validarRol(credencial.getRol());
     }
-
-    /**
-     * Valida el rol
-     * @param rol rol
-     * @throws IllegalArgumentException Si el rol no cumple con las reglas de validación
-     */
-    public void validarRol(Rol rol) {
-        if (rol.getNombre() != null) {
-            if (rol.getNombre().length() > 50) {
-                throw new RuntimeException("El valor nombre del rol excede máximo de caracteres (50)");
-            }
-        } else {
-            throw new IllegalArgumentException("El nombre del rol es requerido");
-        }
-    }
-
 
     // MÉTODOS DE VERIFICACION DE CREDENCIALES PARA LOGIN
 

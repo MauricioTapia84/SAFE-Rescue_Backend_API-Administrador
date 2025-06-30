@@ -27,7 +27,7 @@ public class RolService {
      * Obtiene todas los roles registradas en el sistema.
      * @return Lista completa de roles
      */
-    public List<Rol> findAllRoles() {
+    public List<Rol> findAll() {
         return rolRepository.findAll();
     }
 
@@ -37,7 +37,7 @@ public class RolService {
      * @return rol encontrado
      * @throws NoSuchElementException Si no se encuentra el rol
      */
-    public Rol findByRol(Integer id){
+    public Rol findById(Integer id){
         return rolRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No se encontró rol con ID: " + id));
     }
@@ -52,7 +52,6 @@ public class RolService {
      */
     public Rol save(Rol rol) {
         try {
-
             validarRol(rol);
             return rolRepository.save(rol);
         } catch (IllegalArgumentException e) {
@@ -67,7 +66,7 @@ public class RolService {
      * @param rol Datos actualizados del rol
      * @param id Identificador del rol a actualizar
      * @return rol actualizado
-     * @throws IllegalArgumentException Si el rol proporcionado es nulo
+     * @throws IllegalArgumentException Si el rol es nulo o si el nombre del rol es nulo o excede los 50 caracteres
      * @throws NoSuchElementException Si no se encuentra el rol a actualizar
      * @throws RuntimeException Si ocurre algún error durante la actualización
      */
@@ -81,17 +80,23 @@ public class RolService {
                     .orElseThrow(() -> new NoSuchElementException("Rol no encontrada"));
 
             //Control de errores
-            if (rol.getNombre() != null) {
-                if (rol.getNombre().length() > 50) {
-                    throw new IllegalArgumentException("El Nombre no puede exceder los 50 caracteres");
-                } else {
-                    antiguaRol.setNombre(rol.getNombre());
-                }
+            if (rol.getNombre() == null) {
+                throw new IllegalArgumentException("El Nombre no puede ser nulo");
             }
 
+            if (rol.getNombre().length() > 50) {
+                throw new IllegalArgumentException("El Nombre no puede exceder los 50 caracteres");
+            }
+
+            antiguaRol.setNombre(rol.getNombre());
+
             return rolRepository.save(antiguaRol);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al actualizar el rol: " + e.getMessage());
+        }catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Error al actualizar el rol: " + e.getMessage());
+        } catch (NoSuchElementException  f) {
+            throw new NoSuchElementException("Error al actualizar el rol: " + f.getMessage());
+        } catch (Exception g) {
+            throw new RuntimeException("Error al actualizar el rol: " + g.getMessage());
         }
     }
 
@@ -116,12 +121,12 @@ public class RolService {
      * @throws IllegalArgumentException Si el rol no cumple con las reglas de validación
      */
     public void validarRol(Rol rol) {
-        if (rol.getNombre() != null) {
-            if (rol.getNombre().length() > 50) {
-                throw new RuntimeException("El valor nombre del rol excede máximo de caracteres (50)");
-            }
-        } else {
+        if (rol.getNombre() == null) {
             throw new IllegalArgumentException("El nombre del rol es requerido");
+        }
+
+        if (rol.getNombre().length() > 50) {
+            throw new IllegalArgumentException("El valor nombre del rol excede máximo de caracteres (50)");
         }
     }
 

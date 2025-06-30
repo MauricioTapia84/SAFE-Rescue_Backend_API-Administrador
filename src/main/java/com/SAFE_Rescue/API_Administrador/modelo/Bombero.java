@@ -1,5 +1,6 @@
 package com.SAFE_Rescue.API_Administrador.modelo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -73,6 +74,7 @@ public class Bombero {
      */
     @Column(name = "fecha_registro", nullable = false)
     @Schema(description = "Fecha de registro del bombero", example = "2022-01-01", required = true)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ", timezone = "GMT-4")
     private Date fechaRegistro;
 
     /**
