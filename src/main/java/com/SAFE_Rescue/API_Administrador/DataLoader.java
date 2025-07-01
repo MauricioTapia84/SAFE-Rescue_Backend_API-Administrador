@@ -7,19 +7,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
 import java.util.*;
 
+/**
+ * Clase encargada de cargar datos iniciales en la base de datos del administrador.
+ * <p>
+ * Esta clase se ejecuta solo en el perfil 'dev' y utiliza Faker para generar datos ficticios
+ * para las entidades de la aplicación, incluyendo roles, credenciales y bomberos.
+ * </p>
+ */
 @Profile("dev")
 @Component
 public class DataLoader implements CommandLineRunner {
 
-    @Autowired
-    BomberoRepository bomberoRepository;
-    @Autowired
-    CredencialRepository credencialRepository;
-    @Autowired
-    RolRepository rolRepository;
+    @Autowired private BomberoRepository bomberoRepository;
+    @Autowired private CredencialRepository credencialRepository;
+    @Autowired private RolRepository rolRepository;
 
+    /**
+     * Método que se ejecuta al iniciar la aplicación.
+     * <p>
+     * Genera datos ficticios para las entidades Rol, Credencial y Bombero.
+     * </p>
+     *
+     * @param args Argumentos de línea de comandos
+     * @throws Exception si ocurre un error durante la ejecución
+     */
     @Override
     public void run(String... args) throws Exception {
         System.out.println("DataLoader is running...");
@@ -113,6 +127,12 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
+    /**
+     * Calcula el dígito verificador (DV) del RUT chileno.
+     *
+     * @param rut El RUT del que se desea calcular el DV.
+     * @return El dígito verificador como un String.
+     */
     public String calcularDv(int rut) {
         int suma = 0;
         int multiplicador = 2;
